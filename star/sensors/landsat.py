@@ -1,23 +1,39 @@
+
 """
 Landsat sensor module.
 
-This module provides the Landsat class used throughout the
-STAR Framework.
+This module provides access to Landsat products within
+the STAR Framework.
 """
+
+from geopandas import GeoDataFrame
+
+from .landsat_tile import LandsatTile
 
 
 class Landsat:
     """
     Interface to the Landsat archive.
-
-    This class will be responsible for:
-
-    - searching Landsat scenes,
-    - downloading Landsat products,
-    - reading Landsat metadata.
-
-    The implementation will be added progressively.
     """
+
+    def find_tile(self, aoi: GeoDataFrame) -> LandsatTile:
+        """
+        Find the Landsat tile covering the Area of Interest.
+
+        Parameters
+        ----------
+        aoi : GeoDataFrame
+            Area of interest.
+
+        Returns
+        -------
+        LandsatTile
+            Landsat tile covering the AOI.
+        """
+
+        raise NotImplementedError(
+            "find_tile() has not been implemented yet."
+        )
 
     def __repr__(self):
         return "Landsat()"
