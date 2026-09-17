@@ -1,0 +1,20 @@
+"""
+STAR Framework core module.
+"""
+
+from . import __version__
+
+
+class STAR:
+    """
+    Main STAR Framework class.
+
+    This class provides the public interface to the STAR Framework.
+    """
+
+    def __init__(self):
+        """Initialize the STAR Framework."""
+        pass
+
+    def __repr__(self):
+        return f"STAR Framework v{__version__}"

@@ -1,0 +1,10 @@
+"""
+STAR Framework.
+
+Spatial Thermal Adaptive Regression Framework
+for thermal remote sensing downscaling.
+"""
+
+from .core import STAR
+
+__version__ = "0.1.0"
