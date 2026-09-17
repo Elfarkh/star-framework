@@ -8,44 +8,16 @@ STAR Framework.
 
 class Landsat:
     """
-    Landsat sensor.
+    Interface to the Landsat archive.
 
-    This class manages Landsat data including
-    searching,
-    downloading,
-    preprocessing,
-    and metadata handling.
+    This class will be responsible for:
+
+    - searching Landsat scenes,
+    - downloading Landsat products,
+    - reading Landsat metadata.
+
+    The implementation will be added progressively.
     """
-
-"""
-Landsat sensor module.
-
-This module provides the Landsat class used throughout the
-STAR Framework.
-"""
-
-
-class Landsat:
-    """
-    Landsat sensor.
-
-    This class manages Landsat data including
-    searching,
-    downloading,
-    preprocessing,
-    and metadata handling.
-    """
-
-    def __init__(self):
-        """Initialize a Landsat object."""
-
-        print("Landsat sensor initialized.")
-
-    def __repr__(self):
-        return "Landsat()"    def __init__(self):
-        """Initialize a Landsat object."""
-
-        print("Landsat sensor initialized.")
 
     def __repr__(self):
         return "Landsat()"
