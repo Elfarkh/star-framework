@@ -5,6 +5,7 @@ Landsat scene data model.
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 
 @dataclass
@@ -14,12 +15,13 @@ class LandsatScene:
     """
 
     scene_id: str
-    platforme: str
+    platform: str
     acquisition_date: datetime
 
     path: int
     row: int
 
-    cloud_cover: float
+    cloud_cover: float | None = None
 
-    local_path: Path
+    assets: dict | None = None
+    local_path: Optional[Path] = None
