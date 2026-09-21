@@ -1,8 +1,8 @@
-from star.sensors.landsat import Landsat
+import geopandas as gpd
 
-landsat = Landsat()
-
-grid = landsat._wrs2
+grid = gpd.read_file(
+    "star/data/wrs2/usgs/WRS2_descending.shp"
+)
 
 print(list(grid.columns))
 

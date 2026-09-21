@@ -12,11 +12,17 @@ from geopandas import GeoDataFrame
 
 from .landsat_tile import LandsatTile
 
-
 class Landsat:
     """
     Interface to the Landsat archive.
     """
+
+    def __init__(self):
+        """
+        Initialize the Landsat interface.
+        """
+
+        self._wrs2 = self._load_wrs2_grid()
 
     def _load_wrs2_grid(self) -> gpd.GeoDataFrame:
         """
@@ -25,7 +31,7 @@ class Landsat:
         Returns
         -------
         GeoDataFrame
-        Landsat WRS-2 descending grid.
+            Landsat WRS-2 descending grid.
         """
 
         wrs2_file = (
@@ -52,9 +58,41 @@ class Landsat:
         LandsatTile
             Landsat tile covering the AOI.
         """
+        grid = self._wrs2
+        if aoi.crs != grid.crs:
+            aoi = aoi.to_crs(grid.crs)
 
-        raise NotImplementedError(
-            "find_tile() has not been implemented yet."
+        matches = grid[grid.intersects(aoi.union_all())]
+
+        if len(matches) == 0:
+            raise ValueError(
+                "The AOI does not intersect any Landsat tile."
+            )
+
+        if len(matches) == 1:
+            tile = matches.iloc[0]
+
+            return LandsatTile(
+                path=int(tile["PATH"]),
+                row=int(tile["ROW"]),
+            )
+
+        matches = matches.to_crs("EPSG:6933")
+        aoi = aoi.to_crs("EPSG:6933")
+
+        matches = matches.copy()
+
+        matches["overlap_area"] = (
+            matches.geometry.intersection(aoi.union_all()).area
+        )
+
+        tile = matches.loc[
+            matches["overlap_area"].idxmax()
+        ]
+
+        return LandsatTile(
+            path=int(tile["PATH"]),
+            row=int(tile["ROW"]),
         )
 
     def __repr__(self):

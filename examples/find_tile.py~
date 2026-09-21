@@ -1,0 +1,25 @@
+import geopandas as gpd
+from shapely.geometry import box
+
+from star.sensors.landsat import Landsat
+
+aoi = gpd.GeoDataFrame(
+    geometry=[box(-8.55, 31.55, -8.35, 31.75)],
+    crs="EPSG:4326",
+)
+
+landsat = Landsat()
+
+grid = landsat._wrs2
+
+matches = grid[grid.intersects(aoi.union_all())]
+
+matches = matches.copy()
+
+matches["overlap_area"] = (
+    matches.geometry.intersection(aoi.union_all())
+    .area
+)
+
+print(matches[["PATH", "ROW", "overlap_area"]])
+
