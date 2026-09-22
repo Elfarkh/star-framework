@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "star"
+version = "0.1.0"
+description = "Spatial Thermal Adaptive Regression Framework"
+authors = [
+    {name = "Jamal EL FARKH"}
+]
+requires-python = ">=3.11"
+
+[tool.setuptools]
+packages = ["star"]

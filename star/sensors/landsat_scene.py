@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-
+from dataclasses import dataclass, field
 
 @dataclass
 class LandsatScene:
@@ -23,5 +23,5 @@ class LandsatScene:
 
     cloud_cover: float | None = None
 
-    assets: dict | None = None
+    assets: dict | None = field(default=None, repr=False)
     local_path: Optional[Path] = None
