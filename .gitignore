@@ -1,0 +1,18 @@
+# Downloaded data
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Temporary files
+*~
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# Conda
+.env
