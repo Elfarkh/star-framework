@@ -4,7 +4,7 @@ STAC catalog interface.
 
 from pystac_client import Client
 from datetime import datetime
-
+import planetary_computer
 
 class STAC:
     """
@@ -42,4 +42,9 @@ class STAC:
             datetime=f"{start_date.isoformat()}/{end_date.isoformat()}",
         )
 
-        return list(search.items())
+        items = list(search.items())
+
+        return [
+            planetary_computer.sign(item)
+            for item in items
+        ]

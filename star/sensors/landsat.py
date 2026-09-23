@@ -14,16 +14,32 @@ from .landsat_tile import LandsatTile
 from .landsat_scene import LandsatScene
 from datetime import datetime
 from ..catalogs.stac import STAC
+from urllib.request import urlretrieve
+from urllib.parse import urlparse
+
+STAR_ASSETS = [
+    "red",
+    "nir08",
+    "lwir11",
+    "qa_pixel",
+]
 
 class Landsat:
     """
     Interface to the Landsat archive.
     """
 
-    def __init__(self):
+    def __init__(self, download_directory: str | Path = "data"):
         """
         Initialize the Landsat interface.
+
+        Parameters
+        ----------
+        data_directory : str or Path
+        Directory where Landsat data will be stored.
         """
+
+        self.download_directory = Path(download_directory)
 
         self._wrs2 = self._load_wrs2_grid()
         self._catalog = STAC()
@@ -169,6 +185,48 @@ class Landsat:
             self._item_to_scene(item)
             for item in items
         ]
+
+
+    def download(self, scene: LandsatScene):
+        """
+        Download the assets required by STAR for one Landsat scene.
+        """
+
+        scene_directory = (
+            self.download_directory
+            / "landsat"
+            / scene.scene_id
+        )
+
+        scene_directory.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        url = scene.assets["red"].href
+
+        for asset_name in STAR_ASSETS:
+
+            asset = scene.assets[asset_name]
+
+            filename = Path(
+                urlparse(asset.href).path
+            ).name
+
+            output_file = scene_directory / filename
+
+            if output_file.exists():
+                print(f"Skipping {filename}")
+                continue
+
+            print(f"Downloading {filename}")
+
+            urlretrieve(asset.href, output_file)
+
+        scene.local_path = scene_directory
+
+        return scene
+
 
     def __repr__(self):
         return "Landsat()"
