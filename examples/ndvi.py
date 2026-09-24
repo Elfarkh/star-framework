@@ -1,4 +1,6 @@
 from datetime import datetime
+
+import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
@@ -11,13 +13,16 @@ aoi = gpd.GeoDataFrame(
 
 landsat = Landsat()
 
-scenes = landsat.search(
+scene = landsat.search(
     aoi=aoi,
     start_date=datetime(2025, 1, 1),
     end_date=datetime(2025, 12, 31),
-)
+)[0]
 
-scene = landsat.download(scenes[0])
-landsat.read(scene, "red")
+scene = landsat.download(scene)
 
-print(scene.local_path)
+ndvi = landsat.ndvi(scene)
+
+print(np.nanmin(ndvi.data))
+print(np.nanmax(ndvi.data))
+print(ndvi.shape)

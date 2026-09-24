@@ -11,13 +11,17 @@ aoi = gpd.GeoDataFrame(
 
 landsat = Landsat()
 
-scenes = landsat.search(
+scene = landsat.search(
     aoi=aoi,
     start_date=datetime(2025, 1, 1),
     end_date=datetime(2025, 12, 31),
-)
+)[0]
 
-scene = landsat.download(scenes[0])
-landsat.read(scene, "red")
+scene = landsat.download(scene)
 
-print(scene.local_path)
+red = landsat.read(scene, "red")
+
+print(red.shape)
+print(red.dtype)
+print(red.crs)
+print(red.nodata)

@@ -16,6 +16,9 @@ from datetime import datetime
 from ..catalogs.stac import STAC
 from urllib.request import urlretrieve
 from urllib.parse import urlparse
+import rasterio
+from ..raster import Raster
+import numpy as np
 
 STAR_ASSETS = [
     "red",
@@ -227,6 +230,78 @@ class Landsat:
 
         return scene
 
+    def read(self, scene: LandsatScene, band: str):
+        """
+        Read one downloaded Landsat band.
+        """
+
+        filename = {
+            "red": "SR_B4",
+            "nir08": "SR_B5",
+            "lwir11": "ST_B10",
+            "qa_pixel": "QA_PIXEL",
+        }[band]
+
+        files = list(
+            scene.local_path.glob(f"*{filename}.TIF")
+        )
+
+        if len(files) != 1:
+            raise FileNotFoundError(
+                f"Could not find band '{band}' for scene {scene.scene_id}."
+            )
+        
+        with rasterio.open(files[0]) as src:
+
+            image = src.read(1).astype("float32")
+
+            profile = src.profile
+
+            nodata = src.nodata
+
+            if nodata is not None:
+                image[image == nodata] = np.nan
+
+        return Raster(
+            data=image,
+            profile=profile,
+        )
+
+    def _reflectance(
+        self,
+        scene: LandsatScene,
+        band: str,
+    ) -> Raster:
+        """
+        Read a surface reflectance band.
+        """
+
+        raster = self.read(scene, band)
+
+        reflectance = raster.data.astype("float32") * 0.0000275 - 0.2
+
+        reflectance[reflectance <= 0] = np.nan
+
+        return Raster(
+            data=reflectance,
+            profile=raster.profile,
+        )
+    
+    def ndvi(self, scene: LandsatScene) -> Raster:
+        """
+        Compute NDVI from a Landsat scene.
+        """
+
+        red = self._reflectance(scene, "red")
+
+        nir = self._reflectance(scene, "nir08")
+
+        ndvi = (nir.data - red.data) / (nir.data + red.data)
+
+        return Raster(
+            data=ndvi,
+            profile=red.profile,
+        )
 
     def __repr__(self):
         return "Landsat()"
