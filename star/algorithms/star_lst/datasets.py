@@ -71,12 +71,22 @@ class Triangle:
     right: tuple[float, float]
 
 @dataclass
+class LocalRegression:
+    """
+    Local regression model associated with one triangle.
+    """
+
+    triangle_id: int
+
+    model: LinearRegression
+
+@dataclass
 class RegressionDataset(TriangleDataset):
     """
     Dataset after local regression.
     """
 
-    regression_models: Optional[dict] = None
+    regressions: list[LocalRegression] | None = None
 
 
 @dataclass
