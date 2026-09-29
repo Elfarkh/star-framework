@@ -2,12 +2,16 @@
 STAR-LST data preparation.
 """
 
-from ...core.star_dataset import STARDataset
-from ...utils.resampling import aggregate
 import numpy as np
 
-from .datasets import PreparedDataset
+from ...core.raster import Raster
+from ...core.star_dataset import STARDataset
+from ...utils.resampling import aggregate
 
+from .datasets import (
+    CalibrationSamples,
+    PreparedDataset,
+)
 
 def prepare(
     dataset: STARDataset,

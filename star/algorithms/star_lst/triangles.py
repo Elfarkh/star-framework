@@ -4,21 +4,22 @@ STAR-LST triangle construction.
 import numpy as np
 from .metadata import NDVI_MAX
 from .metadata import DEFAULT_NUMBER_OF_NDVI_BINS
+from .metadata import (
+    NDVI_MAX,
+    DRY_EDGE_WIDTH,
+    THERMAL_BASELINE_PERCENTILE,
+    DEFAULT_NUMBER_OF_NDVI_BINS,
+)
+
 from .datasets import (
     PreparedDataset,
     TriangleDataset,
+    TriangleGeometry,
+    Triangle,
+    DryEdgeAnchor,
 )
-from shapely.geometry import Point, Polygon
-
-def build_triangles(
-    prepared: PreparedDataset,
-) -> TriangleDataset:
-    """
-    Build the STAR-LST triangular partition.
-    """
-
-    raise NotImplementedError
-
+import shapely
+from shapely.geometry import Polygon
 
 def _compute_ndvi_domain(
     prepared: PreparedDataset,
@@ -31,7 +32,7 @@ def _compute_ndvi_domain(
 
     ndvi_min = np.min(ndvi)
 
-    ndvi_max = 1.0
+    ndvi_max = NDVI_MAX
 
     return ndvi_min, ndvi_max
 
@@ -47,7 +48,7 @@ def _compute_lst_baseline(
 
     threshold = np.percentile(
         lst,
-        5,
+        THERMAL_BASELINE_PERCENTILE,
     )
 
     baseline = np.mean(
@@ -86,7 +87,7 @@ def _compute_dry_edge_anchor(
 
 def _build_ndvi_bins(
     ndvi_min: float,
-    num_bins: int = 5,
+    num_bins: int = DEFAULT_NUMBER_OF_NDVI_BINS,
 ) -> np.ndarray:
     """
     Partition the NDVI domain.
@@ -157,7 +158,16 @@ def assign_samples(
     Assign calibration samples to STAR-LST triangles.
     """
 
-    raise NotImplementedError
+    triangle_ids = _assign_triangle_ids(
+        prepared,
+        geometry,
+    )
+
+    return TriangleDataset(
+        **prepared.__dict__,
+        geometry=geometry,
+        triangle_ids=triangle_ids,
+    )
 
 def _assign_triangle_ids(
     prepared: PreparedDataset,
@@ -167,16 +177,14 @@ def _assign_triangle_ids(
     Assign every calibration sample to one triangle.
     """
 
-    points = [
-        Point(ndvi, lst)
-        for ndvi, lst in zip(
-            prepared.samples.ndvi,
-            prepared.samples.lst,
-        )
-    ]
+    ndvi = prepared.samples.ndvi
+    lst = prepared.samples.lst
+
+    # Create all sample points at once
+    points = shapely.points(ndvi, lst)
 
     triangle_ids = np.full(
-        len(points),
+        ndvi.shape,
         -1,
         dtype=int,
     )
@@ -194,10 +202,11 @@ def _assign_triangle_ids(
             ]
         )
 
-        for j, point in enumerate(points):
+        inside = shapely.contains(
+            polygon,
+            points,
+        )
 
-            if polygon.contains(point):
-                triangle_ids[j] = i
+        triangle_ids[inside] = i
 
     return triangle_ids
-

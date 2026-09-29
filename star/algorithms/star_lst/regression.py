@@ -2,11 +2,15 @@
 STAR-LST local regression.
 """
 
+import numpy as np
+
+from sklearn.linear_model import LinearRegression
+
 from .datasets import (
+    LocalRegression,
     TriangleDataset,
     RegressionDataset,
 )
-
 
 def fit_regressions(
     triangles: TriangleDataset,

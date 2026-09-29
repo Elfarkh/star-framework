@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
-
+from sklearn.linear_model import LinearRegression
 from ...core.raster import Raster
 from ...core.star_dataset import STARDataset
 
@@ -21,6 +21,27 @@ class CalibrationSamples:
     lst: np.ndarray
 
 @dataclass
+class DryEdgeAnchor:
+    """
+    Dry-edge anchor point (P1).
+    """
+
+    ndvi: float
+    lst: float
+
+@dataclass
+class Triangle:
+    """
+    One STAR-LST triangle.
+    """
+
+    apex: DryEdgeAnchor
+
+    left: tuple[float, float]
+
+    right: tuple[float, float]
+
+@dataclass
 class PreparedDataset(STARDataset):
     """
     Dataset after preparation.
@@ -31,8 +52,7 @@ class PreparedDataset(STARDataset):
     calibration_mask: Optional[Raster] = None
 
     samples: Optional[CalibrationSamples] = None
-
-
+    
 @dataclass
 class TriangleGeometry:
     """
@@ -57,18 +77,6 @@ class TriangleDataset(PreparedDataset):
     geometry: TriangleGeometry | None = None
 
     triangle_ids: np.ndarray | None = None
-
-@dataclass
-class Triangle:
-    """
-    One STAR-LST triangle.
-    """
-
-    apex: DryEdgeAnchor
-
-    left: tuple[float, float]
-
-    right: tuple[float, float]
 
 @dataclass
 class LocalRegression:
