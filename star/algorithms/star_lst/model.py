@@ -5,6 +5,8 @@ STAR-LST model.
 from .datasets import (
     TriangleGeometry,
     LocalRegression,
+    PredictionDataset,
+    RegressionDataset,
 )
 from ...core.star_dataset import STARDataset
 from .datasets import PredictionDataset
@@ -64,7 +66,7 @@ class STARLST:
         dataset: STARDataset,
     ) -> PredictionDataset:
         """
-        Predict fine-resolution LST.
+        Predict fine-resolution LST using the calibrated STAR-LST model.
         """
 
         if not self.is_calibrated:
@@ -72,4 +74,13 @@ class STARLST:
                 "STAR-LST must be calibrated before prediction."
             )
 
-        raise NotImplementedError
+        regression = RegressionDataset(
+            coarse_lst=dataset.coarse_lst,
+            fine_ndvi=dataset.fine_ndvi,
+            reference_lst=dataset.reference_lst,
+            weather=dataset.weather,
+            geometry=self.geometry,
+            regressions=self.regressions,
+        )
+
+        return predict_lst(regression)
