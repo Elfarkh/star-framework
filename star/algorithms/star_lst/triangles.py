@@ -36,12 +36,23 @@ def _compute_ndvi_domain(
 
 def _compute_lst_baseline(
     prepared: PreparedDataset,
-):
+) -> float:
     """
-    Compute the thermal baseline.
+    Estimate the thermal baseline of the scene.
     """
 
-    raise NotImplementedError
+    lst = prepared.samples.lst
+
+    threshold = np.percentile(
+        lst,
+        5,
+    )
+
+    baseline = np.mean(
+        lst[lst <= threshold]
+    )
+
+    return baseline
 
 
 def _compute_dry_edge(
