@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
@@ -21,9 +20,8 @@ scene = landsat.search(
 
 scene = landsat.download(scene)
 
-ndvi = landsat.ndvi(scene)
+surface_temperature = landsat._surface_temperature(scene)
 
-print(ndvi.min)
-print(ndvi.max)
-print(ndvi.mean)
-print(ndvi.shape)
+print(surface_temperature.min)
+print(surface_temperature.max)
+print(surface_temperature.mean)

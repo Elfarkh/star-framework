@@ -21,9 +21,9 @@ scene = landsat.search(
 
 scene = landsat.download(scene)
 
-ndvi = landsat.ndvi(scene)
+qa = landsat.read(scene, "qa_pixel")
 
-print(ndvi.min)
-print(ndvi.max)
-print(ndvi.mean)
-print(ndvi.shape)
+value = int(np.unique(qa.data)[1])
+
+print(value)
+print(bin(value))

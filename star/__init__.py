@@ -6,4 +6,3 @@ for thermal remote sensing downscaling.
 """
 
 from .version import __version__
-from .core import STAR

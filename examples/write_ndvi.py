@@ -23,7 +23,6 @@ scene = landsat.download(scene)
 
 ndvi = landsat.ndvi(scene)
 
-print(ndvi.min)
-print(ndvi.max)
-print(ndvi.mean)
-print(ndvi.shape)
+ndvi.write("ndvi.tif")
+
+print("Done")

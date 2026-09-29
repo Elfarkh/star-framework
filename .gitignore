@@ -1,4 +1,6 @@
 # Downloaded data
+*.tif
+*.tiff
 data/
 
 # Python
@@ -16,3 +18,6 @@ __pycache__/
 
 # Conda
 .env
+
+outputs/
+*.png

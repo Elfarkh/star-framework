@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import numpy as np
 import geopandas as gpd
 from shapely.geometry import box
 
@@ -21,9 +20,12 @@ scene = landsat.search(
 
 scene = landsat.download(scene)
 
-ndvi = landsat.ndvi(scene)
+mask = landsat.qa_mask(scene)
 
-print(ndvi.min)
-print(ndvi.max)
-print(ndvi.mean)
-print(ndvi.shape)
+print(mask.cloud.shape)
+print(mask.cloud.dtype)
+
+print(mask.cloud.data.sum())
+print(mask.shadow.data.sum())
+print(mask.snow.data.sum())
+print(mask.water.data.sum())
