@@ -2,6 +2,8 @@
 STAR-LST triangle construction.
 """
 import numpy as np
+from .metadata import NDVI_MAX
+from .metadata import DEFAULT_NUMBER_OF_NDVI_BINS
 from .datasets import (
     PreparedDataset,
     TriangleDataset,
@@ -55,31 +57,94 @@ def _compute_lst_baseline(
     return baseline
 
 
-def _compute_dry_edge(
+def _compute_dry_edge_anchor(
     prepared: PreparedDataset,
-):
+    ndvi_min: float,
+) -> DryEdgeAnchor:
     """
-    Compute the dry edge (P1).
+    Compute the dry-edge anchor point (P1).
     """
 
-    raise NotImplementedError
+    samples = prepared.samples
+
+    low_ndvi_mask = (
+        (samples.ndvi >= ndvi_min)
+        &
+        (samples.ndvi <= ndvi_min + DRY_EDGE_WIDTH)
+    )
+
+    ndvi = samples.ndvi[low_ndvi_mask]
+    lst = samples.lst[low_ndvi_mask]
+
+    index = np.argmax(lst)
+
+    return DryEdgeAnchor(
+        ndvi=float(ndvi[index]),
+        lst=float(lst[index]),
+    )
 
 
 def _build_ndvi_bins(
-    prepared: PreparedDataset,
-):
+    ndvi_min: float,
+    num_bins: int = 5,
+) -> np.ndarray:
     """
     Partition the NDVI domain.
     """
 
-    raise NotImplementedError
+    return np.linspace(
+        ndvi_min,
+        NDVI_MAX,
+        num_bins + 1,
+    )
 
+
+def build_triangle_geometry(
+    prepared: PreparedDataset,
+) -> TriangleGeometry:
+
+    ndvi_min, ndvi_max = _compute_ndvi_domain(prepared)
+
+    lst_baseline = _compute_lst_baseline(prepared)
+
+    dry_edge_anchor = _compute_dry_edge_anchor(
+        prepared,
+        ndvi_min,
+    )
+
+    ndvi_edges = _build_ndvi_bins(ndvi_min)
+
+    triangles = _build_triangles(
+        dry_edge_anchor,
+        lst_baseline,
+        ndvi_edges,
+    )
+
+    return TriangleGeometry(
+        ndvi_min=ndvi_min,
+        ndvi_max=ndvi_max,
+        lst_baseline=lst_baseline,
+        dry_edge_anchor=dry_edge_anchor,
+        ndvi_edges=ndvi_edges,
+        triangles=triangles,
+    )
 
 def _build_triangles(
-    prepared: PreparedDataset,
-):
-    """
-    Construct the STAR-LST triangles.
-    """
+    dry_edge_anchor: DryEdgeAnchor,
+    lst_baseline: float,
+    ndvi_edges: np.ndarray,
+) -> list[Triangle]:
 
-    raise NotImplementedError
+    triangles = []
+
+    for i in range(len(ndvi_edges) - 1):
+
+        triangles.append(
+            Triangle(
+                apex=dry_edge_anchor,
+                left=(ndvi_edges[i], lst_baseline),
+                right=(ndvi_edges[i + 1], lst_baseline),
+            )
+        )
+
+    return triangles

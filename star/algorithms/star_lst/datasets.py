@@ -34,25 +34,41 @@ class PreparedDataset(STARDataset):
 
 
 @dataclass
+class TriangleGeometry:
+    """
+    Geometry of the STAR-LST triangular partition.
+    """
+
+    ndvi_min: float
+
+    ndvi_max: float
+
+    lst_baseline: float
+
+    dry_edge_anchor: DryEdgeAnchor
+
+    ndvi_edges: np.ndarray
+
+    triangles: list[Triangle] | None = None
+
+@dataclass
 class TriangleDataset(PreparedDataset):
+
+    geometry: TriangleGeometry | None = None
+
+    triangle_ids: np.ndarray | None = None
+
+@dataclass
+class Triangle:
     """
-    Dataset after triangle construction.
+    One STAR-LST triangle.
     """
 
-    ndvi_min: Optional[float] = None
+    apex: DryEdgeAnchor
 
-    ndvi_max: Optional[float] = None
+    left: tuple[float, float]
 
-    lst_min: Optional[float] = None
-
-    p1: Optional[tuple[float, float]] = None
-
-    ndvi_edges: Optional[np.ndarray] = None
-
-    triangles: Optional[list] = None
-
-    triangle_ids: Optional[np.ndarray] = None
-
+    right: tuple[float, float]
 
 @dataclass
 class RegressionDataset(TriangleDataset):

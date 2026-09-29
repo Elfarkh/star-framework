@@ -1,0 +1,11 @@
+"""
+STAR-LST methodological constants.
+"""
+
+NDVI_MAX = 1.0
+
+DRY_EDGE_WIDTH = 0.05
+
+THERMAL_BASELINE_PERCENTILE = 5
+
+DEFAULT_NUMBER_OF_NDVI_BINS = 15
