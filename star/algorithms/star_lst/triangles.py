@@ -8,7 +8,7 @@ from .datasets import (
     PreparedDataset,
     TriangleDataset,
 )
-
+from shapely.geometry import Point, Polygon
 
 def build_triangles(
     prepared: PreparedDataset,
@@ -148,3 +148,56 @@ def _build_triangles(
         )
 
     return triangles
+
+def assign_samples(
+    prepared: PreparedDataset,
+    geometry: TriangleGeometry,
+) -> TriangleDataset:
+    """
+    Assign calibration samples to STAR-LST triangles.
+    """
+
+    raise NotImplementedError
+
+def _assign_triangle_ids(
+    prepared: PreparedDataset,
+    geometry: TriangleGeometry,
+) -> np.ndarray:
+    """
+    Assign every calibration sample to one triangle.
+    """
+
+    points = [
+        Point(ndvi, lst)
+        for ndvi, lst in zip(
+            prepared.samples.ndvi,
+            prepared.samples.lst,
+        )
+    ]
+
+    triangle_ids = np.full(
+        len(points),
+        -1,
+        dtype=int,
+    )
+
+    for i, triangle in enumerate(geometry.triangles):
+
+        polygon = Polygon(
+            [
+                (
+                    triangle.apex.ndvi,
+                    triangle.apex.lst,
+                ),
+                triangle.left,
+                triangle.right,
+            ]
+        )
+
+        for j, point in enumerate(points):
+
+            if polygon.contains(point):
+                triangle_ids[j] = i
+
+    return triangle_ids
+
