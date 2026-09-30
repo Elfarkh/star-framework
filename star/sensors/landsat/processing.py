@@ -1,5 +1,6 @@
 import numpy as np
-
+from rasterio.transform import from_origin
+from rasterio.warp import transform_bounds
 from ...core.raster import Raster
 from ...core.qa_mask import QAMask
 from ..landsat_scene import LandsatScene
@@ -105,4 +106,78 @@ class LandsatProcessing:
                 data=water,
                 profile=qa.profile,
             ),
+        )
+
+    def grid(
+        self,
+        geometry,
+        resolution: float = 30.0,
+    ) -> Raster:
+        """
+        Create a Landsat processing grid without downloading imagery.
+        """
+
+        # Determine UTM CRS from the centre of the tile
+        centroid = geometry.centroid
+
+        longitude = centroid.x
+        latitude = centroid.y
+
+        zone = int(
+            (longitude + 180) / 6
+        ) + 1
+
+        if latitude >= 0:
+            epsg = 32600 + zone
+        else:
+            epsg = 32700 + zone
+
+        target_crs = f"EPSG:{epsg}"
+
+        # Transform WRS-2 bounds from EPSG:4326 to UTM
+        left, bottom, right, top = transform_bounds(
+            "EPSG:4326",
+            target_crs,
+            *geometry.bounds,
+        )
+
+        width = int(
+            np.ceil(
+                (right - left) / resolution
+            )
+        )
+
+        height = int(
+            np.ceil(
+                (top - bottom) / resolution
+            )
+        )
+
+        transform = from_origin(
+            left,
+            top,
+            resolution,
+            resolution,
+        )
+
+        data = np.full(
+            (height, width),
+            np.nan,
+            dtype="float32",
+        )
+
+        profile = {
+            "driver": "GTiff",
+            "height": height,
+            "width": width,
+            "count": 1,
+            "dtype": "float32",
+            "crs": target_crs,
+            "transform": transform,
+            "nodata": np.nan,
+        }
+
+        return Raster(
+            data=data,
+            profile=profile,
         )
